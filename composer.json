@@ -1,0 +1,13 @@
+{
+    "name": "rroble/opdl",
+    "description": "One Piece manga downloader",
+    "require": {
+        "guzzlehttp/guzzle": "~5.0"
+    },
+    "authors": [
+        {
+            "name": "Randolph Roble",
+            "email": "r.roble@arcanys.com"
+        }
+    ]
+}
