@@ -2,7 +2,7 @@
 
 require_once __DIR__.'/vendor/autoload.php';
 
-$ep = 755;
+$ep = 761;
 
 echo 'Downloading episodes starting from ', $ep, PHP_EOL;
 
@@ -17,14 +17,15 @@ echo 'Done', PHP_EOL;
 
 function download_episode($ep)
 {
-    echo '+ Downloading episode ', $ep, PHP_EOL;
+    echo ' + Downloading episode ', $ep, PHP_EOL;
     $page = 1;
     do {
         $result = ping_page($ep, $page);
         if (!$result) break;
     }
     while ($page++);
-    echo '+ Done', PHP_EOL;
+    echo ' + Done', PHP_EOL;
+	return $page > 1;
 }
 
 function ping_page($ep, $page)
@@ -33,15 +34,20 @@ function ping_page($ep, $page)
     $success = false;
     $tpl = 'http://www.mangareader.net/one-piece/%d/%d';
     $url = sprintf($tpl, $ep, $page);
-    echo '++ Downloading page ', $page;
-    $exists = $client->head($url);
-    if ($exists->getStatusCode() == 200) {
-        $img = get_page_img($url);
-        $dest = get_dest($ep, $page);
-        $success = download_image($img, $dest);
-    }
-    echo ' ++ Done', PHP_EOL;
-    unset($client);
+    echo '  + page ', $page;
+	try {
+		$exists = $client->head($url);
+		if ($exists->getStatusCode() == 200) {
+			$img = get_page_img($url);
+			$dest = get_dest($ep, $page);
+			$success = download_image($img, $dest);
+		}
+		echo ' .. OK', PHP_EOL;
+		unset($client);
+	} catch(Exception $e) {
+		// assume not found
+		echo ' .. end', PHP_EOL;
+	}
     return $success;
 }
 

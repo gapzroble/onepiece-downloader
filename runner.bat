@@ -1,2 +1,2 @@
 @echo off
-php main.php
+cmd /k php main.php
