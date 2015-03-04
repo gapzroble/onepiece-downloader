@@ -93,7 +93,7 @@ class Downloader
             if ($exists->getStatusCode() !== 200) {
                 return false;
             }
-            if (!($img = $this->getImgUrl($url))) {
+            if (!($img = $this->findImgUrl($url))) {
                 $this->log(' .. not yet');
                 return false;
             }
@@ -107,8 +107,10 @@ class Downloader
         return false;
     }
 
-    public function getImgUrl($url)
+    public function findImgUrl($url)
     {
+        // look for this
+        // <img id="img" width="800" height="1162" src="http://i997.mangareader.net/one-piece/778/one-piece-5518563.jpg" alt="One Piece 778 - Page 1" name="img" />
         $html = $this->client->get($url);
         $a = explode('id="img"', $html);
         if (!isset($a[1])) {
@@ -124,20 +126,18 @@ class Downloader
 
     public function getDestinationFile($episode, $page, $ext = '.jpg')
     {
-        if (!file_exists($this->output)) {
-            mkdir($this->output);
-        }
-
-        $episode = sprintf('%s/%s', $this->output, $episode);
-        if (!file_exists($episode)) {
-            mkdir($episode);
-        }
-
-        return sprintf('%s/%s%s', $episode, sprintf('%02d', $page), $ext);
+        return sprintf('%s/%s/%s%s', 
+                $this->output, 
+                sprintf('%03d', $episode), 
+                sprintf('%02d', $page), 
+                $ext);
     }
 
     public function downloadImage($url, $dest)
     {
+        if (!file_exists($dir = dirname($dest))) {
+            mkdir($dir, 0777, true);
+        }
         $result = $this->client->get($url, [
             'save_to' => $dest, 
             'timeout' => $this->timeout,
