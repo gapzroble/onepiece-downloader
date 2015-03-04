@@ -2,7 +2,7 @@
 
 require_once __DIR__.'/vendor/autoload.php';
 
-$ep = 761;
+$ep = isset($argv[1]) ? (int) $argv[1] : 779;
 
 echo 'Downloading episodes starting from ', $ep, PHP_EOL;
 
@@ -39,6 +39,10 @@ function ping_page($ep, $page)
 		$exists = $client->head($url);
 		if ($exists->getStatusCode() == 200) {
 			$img = get_page_img($url);
+			if (!$img) {
+				echo ' .. not yet', PHP_EOL;
+				return false;
+			}
 			$dest = get_dest($ep, $page);
 			$success = download_image($img, $dest);
 		}
@@ -55,11 +59,13 @@ function get_page_img($url)
 {
     $client = new GuzzleHttp\Client();
     $html = $client->get($url);
-    list($a,$b) = explode('id="img"', $html);
-    list($c,$d) = explode('src="', $b);
-    list($e,) = explode('"', $d);
+    $a = explode('id="img"', $html);
+	if (!isset($a[1])) return false;
+    $b = explode('src="', $a[1]);
+	if (!isset($b[1])) return false;
+    list($c,) = explode('"', $b[1]);
     unset($client);
-    return $e;
+    return $c;
 }
 
 function download_image($url, $dest)
